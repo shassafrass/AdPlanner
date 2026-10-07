@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DES 374 Media Launch Planner</title>
+<style>
+:root{--ink:#151515;--paper:#f4f1eb;--orange:#ff5a1f;--muted:#686868;--line:#d5d0c8;--green:#167346}
+*{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 Arial,sans-serif}
+header{background:#111;color:white;padding:20px 5vw;position:sticky;top:0;z-index:5}
+header b{color:var(--orange);letter-spacing:.08em} header span{float:right;color:#bbb}
+main{max-width:1180px;margin:auto;padding:36px 5vw 80px}
+h1{font-size:clamp(38px,6vw,74px);line-height:.96;margin:.2em 0}.dek{font-size:20px;max-width:780px}
+.step{border-top:4px solid #111;padding:24px 0 36px;margin-top:35px}.num{color:var(--orange)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:14px}
+label{font-weight:bold;display:block;margin:9px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #aaa;background:white;font:inherit}textarea{min-height:85px}
+.channels{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.card{background:white;border:1px solid var(--line);padding:15px}.card input{width:auto;margin-right:7px}.card small{display:block;color:var(--muted);margin-top:7px}
+.tip{border-left:5px solid var(--orange);padding:12px 16px;background:white;margin:16px 0}
+.jargon{border-bottom:1px dotted #111;cursor:help}
+button{background:var(--orange);border:0;color:white;padding:14px 20px;font-weight:bold;font-size:16px;cursor:pointer;margin:8px 8px 8px 0}
+button.secondary{background:#222}.meter{height:18px;background:#ddd;margin:8px 0}.meter i{display:block;height:100%;background:var(--orange);width:0}
+table{width:100%;border-collapse:collapse;background:white}th,td{text-align:left;padding:10px;border-bottom:1px solid #ddd}td input{padding:7px}
+#output{background:white;padding:28px;border:3px solid #111;margin-top:30px}.hidden{display:none}.warn{color:#9c2d00;font-weight:bold}.ok{color:var(--green);font-weight:bold}
+@media print{header,.no-print,.step:not(#resultStep){display:none}body{background:white}main{padding:0}#output{border:0}}
+</style></head>
+<body>
+<header><b>DES 374 / MEDIA LAUNCH PLANNER</b><span>Strategy → Production → Launch</span></header>
+<main>
+<h1>Build a campaign<br>you can actually make.</h1>
+<p class="dek">Define the audience, choose a defensible media mix, allocate a fictional media budget, then translate strategy into attainable creative deliverables for exhibition launch.</p>
+
+<section class="step"><h2><span class="num">01</span> Campaign + Target Audience</h2>
+<div class="grid">
+<div><label>Brand / campaign</label><input id="brand" placeholder="Fictional brand"></div>
+<div><label>Geographic market</label><input id="geo" value="Buffalo–Niagara"></div>
+<div><label>Age range</label><input id="age" placeholder="e.g. 18–29"></div>
+<div><label>Life stage / context</label><input id="life" placeholder="e.g. college + early career"></div>
+</div>
+<div class="grid">
+<div><label>Interests / behaviors</label><textarea id="beh" placeholder="What do they care about? Where does their attention go?"></textarea></div>
+<div><label>Need / desire connecting them to the brand</label><textarea id="need"></textarea></div>
+<div><label>Where/how do they buy?</label><textarea id="buy"></textarea></div>
+</div>
+<div class="tip"><b>Research check:</b> distinguish what you <b>know</b> from what you are <b>assuming</b>. “Gen Z” is not an audience strategy.</div>
+<label>Evidence / known facts</label><textarea id="known"></textarea>
+<label>Assumptions that still need support</label><textarea id="assume"></textarea>
+</section>
+
+<section class="step"><h2><span class="num">02</span> Campaign Objective</h2>
+<label>At launch, what do you want the audience to know, feel, or do?</label>
+<textarea id="objective" placeholder="Example: Introduce the brand and motivate local 18–29-year-olds to visit the launch pop-up."></textarea>
+<div class="tip"><b><span class="jargon" title="Key Performance Indicator: a measurable result used by a real campaign to judge whether it is meeting an objective.">KPI</span>:</b> Key Performance Indicator. A real campaign might track reach, engagement, clicks, conversions or sales. <b>You are not measuring KPIs in this project.</b> Your exhibition is the campaign launch.</div>
+</section>
+
+<section class="step"><h2><span class="num">03</span> Choose Media</h2>
+<p>Choose a concentrated mix. Each selected channel creates production work.</p>
+<div class="channels" id="channels"></div>
+</section>
+
+<section class="step"><h2><span class="num">04</span> Fictional Media Budget</h2>
+<div class="grid"><div><label>Total media budget</label><input id="budget" type="number" value="25000" min="0"></div><div><label>Campaign length</label><select id="length"><option>30 days</option><option selected>60 days</option><option>90 days</option></select></div></div>
+<p><span class="jargon" title="Cost Per Mille: cost to deliver 1,000 ad impressions. Mille means thousand.">CPM</span> = <b>Cost Per Mille</b>, the estimated cost of 1,000 ad impressions. It helps compare media costs; the cheapest CPM is not automatically the best audience choice.</p>
+<table><thead><tr><th>Selected channel</th><th>Spend</th><th>% budget</th><th>Why here?</th></tr></thead><tbody id="budgetRows"></tbody></table>
+<div class="meter"><i id="meter"></i></div><p id="budgetStatus"></p>
+</section>
+
+<section class="step"><h2><span class="num">05</span> Creative Production</h2>
+<p>The planner converts media choices into a <b>student-scale launch package</b>, not a literal inventory of every ad a professional campaign would buy.</p>
+<div id="deliverables" class="grid"></div><div id="load"></div>
+</section>
+
+<section class="step" id="resultStep"><h2><span class="num">06</span> Launch Plan</h2>
+<button onclick="generate()">GENERATE MEDIA + EXHIBITION PLAN</button><button class="secondary no-print" onclick="window.print()">PRINT / SAVE PDF</button>
+<div id="output" class="hidden"></div>
+</section>
+</main>
+<script>
+const data=[
+["Paid Social","Instagram / Meta, TikTok, Snapchat, LinkedIn, Pinterest, Reddit","9-post launch presence: 6 carousel/static posts + 3 short-form videos; profile image + bio","Digital/social presentation"],
+["Search","Google / Bing search","3 search-ad copy variations + keyword set + landing-page design","Landing-page board + search-ad specimen"],
+["Display","Web banner/display","3 master display concepts adapted to 3 common proportions","Printed/digital display-ad strip"],
+["Online Video","YouTube / web video","1 × 30-sec hero video + 1 × 15-sec cutdown + end card","Looped video + storyboard"],
+["Streaming TV","CTV / Hulu / Roku / Peacock","1 × 30-sec spot + 1 × 15-sec cutdown","Video loop on screen"],
+["Broadcast / Cable TV","Local or national TV","1 × 30-sec spot + storyboard","Video + storyboard"],
+["Streaming Audio","Spotify / iHeart-style audio","1 × 30-sec audio spot + 1 × 15-sec cutdown + companion graphic","Headphones/audio station + graphic"],
+["Radio","Local terrestrial radio","1 × 30-sec spot + script + 15-sec cutdown","Audio station + printed script"],
+["Podcast","Podcast sponsorship / host-read concept","30-sec ad + 15-sec alternate + sponsorship graphic","Audio + sponsorship graphic"],
+["Outdoor / OOH","Billboards / digital out-of-home","3 related billboard executions; 1 contextual mockup","Large hero OOH print + variations"],
+["Transit","Bus, rail, shelter","2 coordinated transit applications + contextual mockups","Large transit application + mockups"],
+["Print","Magazine / newspaper","2 campaign print ads using a shared system","2 finished print executions"],
+["Cinema","Pre-show / theater advertising","15–30 sec cinema spot + lobby poster","Video + poster"],
+["Retail Media","Amazon / Walmart-style retail","3 retail display units + product/landing-page mockup","Retail-media presentation board"],
+["Experiential / Street","Posters, event, guerrilla/street","Poster system + one physical/takeaway application","Large poster + physical artifact"]
+];
+const ch=document.getElementById("channels");
+data.forEach((d,i)=>ch.insertAdjacentHTML("beforeend",`<label class="card"><input type="checkbox" value="${i}" onchange="refresh()"> <b>${d[0]}</b><small>${d[1]}</small></label>`));
+function selected(){return [...document.querySelectorAll('#channels input:checked')].map(x=>+x.value)}
+function refresh(){
+ const ids=selected(),tbody=document.getElementById("budgetRows"),old={};
+ [...tbody.querySelectorAll("tr")].forEach(r=>old[r.dataset.i]=[r.querySelector(".sp").value,r.querySelector(".why").value]);
+ tbody.innerHTML="";
+ ids.forEach(i=>{let v=old[i]||["",""];tbody.insertAdjacentHTML("beforeend",`<tr data-i="${i}"><td>${data[i][0]}</td><td>$ <input class="sp" type="number" min="0" value="${v[0]}" oninput="calc()"></td><td class="pct">0%</td><td><input class="why" value="${v[1]}" placeholder="Audience + strategic reason"></td></tr>`)});
+ document.getElementById("deliverables").innerHTML=ids.map(i=>`<div class="card"><b>${data[i][0]}</b><br>${data[i][2]}<small><b>Exhibition:</b> ${data[i][3]}</small></div>`).join("");
+ document.getElementById("load").innerHTML=ids.length<=4?`<p class="ok">Production scope: ${ids.length?"CONCENTRATED":"Choose media above."}</p>`:`<p class="warn">Production warning: ${ids.length} channels is likely too broad. Concentrate on 3–4 channels and make them excellent.</p>`;
+ calc();
+}
+function calc(){
+ let total=+document.getElementById("budget").value||0,sum=0;
+ document.querySelectorAll("#budgetRows tr").forEach(r=>{let n=+r.querySelector(".sp").value||0;sum+=n;r.querySelector(".pct").textContent=total?Math.round(n/total*100)+"%":"0%"});
+ document.getElementById("meter").style.width=Math.min(total?sum/total*100:0,100)+"%";
+ document.getElementById("budgetStatus").innerHTML=`Allocated: <b>$${sum.toLocaleString()}</b> of $${total.toLocaleString()} — ${sum>total?'<span class="warn">OVER BUDGET</span>':`$${(total-sum).toLocaleString()} remaining`}`;
+}
+document.getElementById("budget").addEventListener("input",calc);
+function val(id){return document.getElementById(id).value||"—"}
+function generate(){
+ let ids=selected(),rows=[...document.querySelectorAll("#budgetRows tr")];
+ let media=rows.map(r=>`<tr><td>${data[+r.dataset.i][0]}</td><td>$${(+r.querySelector(".sp").value||0).toLocaleString()}</td><td>${r.querySelector(".why").value||"—"}</td></tr>`).join("");
+ let dels=ids.map(i=>`<li><b>${data[i][0]}:</b> ${data[i][2]} <em>Exhibition: ${data[i][3]}.</em></li>`).join("");
+ let o=document.getElementById("output");o.classList.remove("hidden");
+ o.innerHTML=`<h2>${val("brand")} — Campaign Launch Plan</h2>
+ <p><b>Audience:</b> ${val("age")}; ${val("geo")}; ${val("life")}.</p>
+ <p><b>Interests/behaviors:</b> ${val("beh")}<br><b>Need/desire:</b> ${val("need")}<br><b>Buying context:</b> ${val("buy")}</p>
+ <p><b>Known:</b> ${val("known")}<br><b>Assumptions:</b> ${val("assume")}</p>
+ <h3>Objective</h3><p>${val("objective")}</p>
+ <h3>Media Plan</h3><p><b>Budget:</b> $${(+document.getElementById("budget").value||0).toLocaleString()} &nbsp; <b>Campaign:</b> ${val("length")}</p>
+ <table><tr><th>Channel</th><th>Spend</th><th>Strategic rationale</th></tr>${media}</table>
+ <h3>Creative Deliverables</h3><ul>${dels||"<li>No channels selected.</li>"}</ul>
+ <h3>Launch / Exhibition Check</h3><p>□ Digital channels populated &nbsp; □ Motion/audio tested &nbsp; □ Physical work produced &nbsp; □ Exhibition files prepared &nbsp; □ Campaign system visually consistent</p>
+ <p><b>Campaign Day 1 = End-of-Semester Exhibition.</b> This project ends at launch; KPI performance is not measured.</p>`;
+ o.scrollIntoView({behavior:"smooth"});
+}
+refresh();
+</script></body></html>
