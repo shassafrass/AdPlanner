@@ -18,6 +18,12 @@ input,select,textarea{width:100%;padding:11px;border:1px solid #aaa;background:w
 .card{background:white;border:1px solid var(--line);padding:15px}.card input{width:auto;margin-right:7px}.card small{display:block;color:var(--muted);margin-top:7px}
 .tip{border-left:5px solid var(--orange);padding:12px 16px;background:white;margin:16px 0}
 .jargon{border-bottom:1px dotted #111;cursor:help}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}.toolbar button{margin:0}
+.suggest{margin-top:18px;background:#fff;border:2px solid #111;padding:18px}
+.suggest h3{margin-top:0}.suggest-item{padding:12px 0;border-top:1px solid #ddd}
+.suggest-item:first-of-type{border-top:0}.score{font-size:12px;font-weight:bold;color:var(--orange);letter-spacing:.06em}
+.checkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:8px 0 14px}
+.checkgrid label{background:#fff;border:1px solid var(--line);padding:9px;font-weight:normal;margin:0}.checkgrid input{width:auto;margin-right:6px}
 button{background:var(--orange);border:0;color:white;padding:14px 20px;font-weight:bold;font-size:16px;cursor:pointer;margin:8px 8px 8px 0}
 button.secondary{background:#222}.meter{height:18px;background:#ddd;margin:8px 0}.meter i{display:block;height:100%;background:var(--orange);width:0}
 table{width:100%;border-collapse:collapse;background:white}th,td{text-align:left;padding:10px;border-bottom:1px solid #ddd}td input{padding:7px}
@@ -29,6 +35,12 @@ table{width:100%;border-collapse:collapse;background:white}th,td{text-align:left
 <main>
 <h1>Build a campaign<br>you can actually make.</h1>
 <p class="dek">Define the audience, choose a defensible media mix, allocate a fictional media budget, then translate strategy into attainable creative deliverables for exhibition launch.</p>
+<div class="toolbar no-print">
+<button onclick="savePlan()">SAVE PLAN</button>
+<button class="secondary" onclick="document.getElementById('openFile').click()">OPEN SAVED PLAN</button>
+<button class="secondary" onclick="newPlan()">NEW PLAN</button>
+<input id="openFile" type="file" accept=".media-plan,.json,application/json" hidden onchange="openPlan(event)">
+</div>
 
 <section class="step"><h2><span class="num">01</span> Campaign + Target Audience</h2>
 <div class="grid">
@@ -42,6 +54,24 @@ table{width:100%;border-collapse:collapse;background:white}th,td{text-align:left
 <div><label>Need / desire connecting them to the brand</label><textarea id="need"></textarea></div>
 <div><label>Where/how do they buy?</label><textarea id="buy"></textarea></div>
 </div>
+<h3>Audience habits</h3>
+<p>Select everything your research reasonably supports.</p>
+<div class="checkgrid" id="habits">
+<label><input type="checkbox" value="social">Social media</label>
+<label><input type="checkbox" value="video">Streaming video</label>
+<label><input type="checkbox" value="audio">Streaming audio / music</label>
+<label><input type="checkbox" value="podcast">Podcasts</label>
+<label><input type="checkbox" value="tv">Television</label>
+<label><input type="checkbox" value="radio">Radio</label>
+<label><input type="checkbox" value="print">Print / magazines</label>
+<label><input type="checkbox" value="search">Search engines</label>
+<label><input type="checkbox" value="events">Events / local culture</label>
+<label><input type="checkbox" value="retail">Retail / in-store</label>
+<label><input type="checkbox" value="commute">Transit / commuting</label>
+<label><input type="checkbox" value="onlinebuy">Online shopping</label>
+</div>
+<button type="button" onclick="suggestMedia()">ANALYZE AUDIENCE → SUGGEST MEDIA</button>
+<div id="suggestions" class="suggest hidden"></div>
 <div class="tip"><b>Research check:</b> distinguish what you <b>know</b> from what you are <b>assuming</b>. “Gen Z” is not an audience strategy.</div>
 <label>Evidence / known facts</label><textarea id="known"></textarea>
 <label>Assumptions that still need support</label><textarea id="assume"></textarea>
@@ -129,6 +159,67 @@ function generate(){
  <h3>Launch / Exhibition Check</h3><p>□ Digital channels populated &nbsp; □ Motion/audio tested &nbsp; □ Physical work produced &nbsp; □ Exhibition files prepared &nbsp; □ Campaign system visually consistent</p>
  <p><b>Campaign Day 1 = End-of-Semester Exhibition.</b> This project ends at launch; KPI performance is not measured.</p>`;
  o.scrollIntoView({behavior:"smooth"});
+}
+
+function audienceText(){
+ return [val("age"),val("geo"),val("life"),val("beh"),val("need"),val("buy"),val("known"),val("assume")].join(" ").toLowerCase();
+}
+function habitValues(){return [...document.querySelectorAll("#habits input:checked")].map(x=>x.value)}
+function suggestMedia(){
+ const t=audienceText(), h=habitValues(), scores=Object.fromEntries(data.map((d,i)=>[i,{n:0,r:[]}]));
+ const add=(i,n,r)=>{scores[i].n+=n;if(r&&!scores[i].r.includes(r))scores[i].r.push(r)};
+ const has=(re)=>re.test(t);
+ let ageNums=(val("age").match(/\d+/g)||[]).map(Number), low=ageNums[0]||null, high=ageNums[1]||low;
+ if((low&&low<35)||(high&&high<35)){add(0,4,"younger audience");add(3,2,"younger audiences often encounter brands through digital video");add(6,1,"streaming media may fit this age group")}
+ if(low&&low>=45){add(5,2,"older adult audience");add(7,2,"radio may be worth evaluating");add(11,2,"print may be worth evaluating")}
+ if(has(/buffalo|local|neighborhood|community|campus|regional/)){add(9,3,"geographically concentrated audience");add(10,2,"local movement and place can make transit relevant");add(14,3,"local audiences can be reached through place-based experiences")}
+ if(h.includes("social")||has(/instagram|tiktok|social|snapchat|pinterest|reddit/))add(0,6,"your research identifies social-media behavior");
+ if(h.includes("video")||has(/youtube|streaming video|video/)){add(3,5,"your audience uses online video");add(4,3,"streaming video behavior can support CTV")}
+ if(h.includes("audio")||has(/spotify|music|streaming audio/))add(6,5,"your audience uses streaming audio or music");
+ if(h.includes("podcast")||has(/podcast/))add(8,5,"your audience listens to podcasts");
+ if(h.includes("tv")||has(/television| cable | tv /)){add(5,4,"television appears in the audience profile");add(4,2,"TV viewing can include streaming TV")}
+ if(h.includes("radio")||has(/radio/))add(7,5,"radio appears in the audience profile");
+ if(h.includes("print")||has(/magazine|newspaper|print/))add(11,5,"print appears in the audience profile");
+ if(h.includes("search")||has(/google|search|research online|look up/))add(1,5,"your audience actively searches for information");
+ if(h.includes("events")||has(/event|concert|festival|nightlife|local culture/)){add(14,5,"your audience participates in events or local culture");add(9,2,"out-of-home can reinforce a place-based campaign")}
+ if(h.includes("retail")||has(/store|in-store|shopping|retail/)){add(13,4,"retail behavior appears in the audience profile");add(9,1,"OOH may support trips to physical locations")}
+ if(h.includes("commute")||has(/commut|bus|train|transit/))add(10,5,"commuting or transit behavior appears in the profile");
+ if(h.includes("onlinebuy")||has(/online shop|buy online|ecommerce|e-commerce/)){add(1,3,"online purchasing makes search relevant");add(2,2,"display can support digital discovery");add(13,2,"retail media may support online purchase")}
+ if(has(/visual|fashion|art|design|food|beauty|restaurant/)){add(0,2,"the product or interest is visually communicative");add(3,2,"video can demonstrate a visually driven offer")}
+ let ranked=Object.entries(scores).map(([i,x])=>({i:+i,...x})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n).slice(0,6);
+ const box=document.getElementById("suggestions"); box.classList.remove("hidden");
+ if(!ranked.length){box.innerHTML="<h3>Media suggestions</h3><p>Add more audience detail or select audience habits. The planner needs evidence before it recommends channels.</p>";return}
+ box.innerHTML="<h3>Media worth considering</h3><p>These are <b>suggestions, not selections.</b> You must decide which media belong in your plan and explain why.</p>"+
+ ranked.map((x,k)=>`<div class="suggest-item"><span class="score">${k<3?"STRONG MATCH":"ALSO CONSIDER"}</span><br><b>${data[x.i][0]}</b> — ${x.r.slice(0,2).join("; ")}. <button type="button" onclick="selectSuggested(${x.i})">ADD TO PLAN</button></div>`).join("")+
+ "<p><small>Don't see an appropriate recommendation? That's okay. Your research may support a medium the planner hasn't prioritized. Select it and make your case.</small></p>";
+}
+function selectSuggested(i){let x=document.querySelector(`#channels input[value="${i}"]`);x.checked=true;refresh();x.closest(".card").scrollIntoView({behavior:"smooth",block:"center"})}
+function collectPlan(){
+ let allocations={};document.querySelectorAll("#budgetRows tr").forEach(r=>allocations[r.dataset.i]={spend:r.querySelector(".sp").value,why:r.querySelector(".why").value});
+ let fields={};["brand","geo","age","life","beh","need","buy","known","assume","objective","budget","length"].forEach(id=>fields[id]=document.getElementById(id).value);
+ return {app:"DES374 Media Launch Planner",version:2,saved:new Date().toISOString(),fields,habits:habitValues(),channels:selected(),allocations};
+}
+function savePlan(){
+ const plan=collectPlan(), brand=(plan.fields.brand||"Untitled").replace(/[^a-z0-9_-]+/gi,"-").replace(/^-|-$/g,"");
+ const blob=new Blob([JSON.stringify(plan,null,2)],{type:"application/json"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);a.download=`${brand||"Untitled"}.media-plan`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+function openPlan(e){
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const p=JSON.parse(r.result);if(!p.fields)throw Error();
+ Object.entries(p.fields).forEach(([id,v])=>{let el=document.getElementById(id);if(el)el.value=v});
+ document.querySelectorAll("#habits input").forEach(x=>x.checked=(p.habits||[]).includes(x.value));
+ document.querySelectorAll("#channels input").forEach(x=>x.checked=(p.channels||[]).includes(+x.value));refresh();
+ Object.entries(p.allocations||{}).forEach(([i,v])=>{let row=document.querySelector(`#budgetRows tr[data-i="${i}"]`);if(row){row.querySelector(".sp").value=v.spend||"";row.querySelector(".why").value=v.why||""}});
+ calc();document.getElementById("suggestions").classList.add("hidden");window.scrollTo({top:0,behavior:"smooth"});
+ }catch(err){alert("That file does not appear to be a valid Media Launch Planner project.");}finally{e.target.value=""}};
+ r.readAsText(f);
+}
+function newPlan(){
+ if(!confirm("Start a new plan? Any unsaved work in this browser window will be cleared."))return;
+ ["brand","age","life","beh","need","buy","known","assume","objective"].forEach(id=>document.getElementById(id).value="");
+ document.getElementById("geo").value="Buffalo–Niagara";document.getElementById("budget").value="25000";document.getElementById("length").value="60 days";
+ document.querySelectorAll('input[type="checkbox"]').forEach(x=>x.checked=false);document.getElementById("suggestions").classList.add("hidden");document.getElementById("output").classList.add("hidden");refresh();window.scrollTo({top:0,behavior:"smooth"});
 }
 refresh();
 </script></body></html>
